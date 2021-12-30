@@ -104,7 +104,7 @@ async function addLiquidity(
   const symbol0 = await token0.symbol();
   const symbol1 = await token1.symbol();
 
-  console.info('Current Balance:');
+  console.info('-- Current Balance:');
   console.info(
     symbol0 + ' Balance:',
     ethers.utils.formatUnits(await token0.balanceOf(deployer), 6)
