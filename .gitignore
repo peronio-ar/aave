@@ -2,7 +2,6 @@
 **/node_modules
 
 artifacts
-deployments
 cache*
 
 .yarn/cache
@@ -19,4 +18,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# build
 build
+
+# Local deployments
+deployments/localhost
+deployments/hardhat

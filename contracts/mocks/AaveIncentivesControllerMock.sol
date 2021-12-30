@@ -8,7 +8,7 @@ contract AaveIncentivesControllerMock {
     address user,
     uint256 userBalance,
     uint256 totalSupply
-  ) external {
+  ) view external {
     console.log('Not implemented', user, userBalance, totalSupply);
   }
 
@@ -24,7 +24,7 @@ contract AaveIncentivesControllerMock {
     address[] calldata assets,
     uint256 amount,
     address to
-  ) external returns (uint256) {
+  ) view external returns (uint256) {
     console.log('Not implemented', assets[0], amount, to);
     return 0;
   }

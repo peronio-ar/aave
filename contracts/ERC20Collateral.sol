@@ -76,7 +76,7 @@ contract ERC20Collateral is ERC20, ERC20Burnable, ERC20Permit, AccessControl {
     }
     
     // Sets initial minting. Cna only be runned once
-    function initiliaze(uint256 collateral, uint256 starting_ratio) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function initialize(uint256 collateral, uint256 starting_ratio) public onlyRole(DEFAULT_ADMIN_ROLE) {
         require(!initialized, 'Contract already initialized');
         IERC20 collateralContract = IERC20(collateral_address);
         

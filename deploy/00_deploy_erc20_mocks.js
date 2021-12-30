@@ -16,6 +16,7 @@ module.exports = async ({ getNamedAccounts, deployments, network }) => {
     const erc20Artifact = await getArtifact('ERC20Mock');
 
     // Save Deployment
+    console.info('Saving environment addresses as contracts');
     save(
       'USDT',
       Object.assign({ address: process.env.USDT_ADDRESS }, erc20Artifact)
@@ -40,8 +41,8 @@ module.exports = async ({ getNamedAccounts, deployments, network }) => {
     }
 
     // Only in mumbai network
-    console.info('Deploy WMATIC Mock');
     await deployERC20Mock('WMATIC', 10000, deploy, deployer);
+    return;
   }
 
   // Only for development chain
@@ -52,13 +53,8 @@ module.exports = async ({ getNamedAccounts, deployments, network }) => {
   ]);
 
   // Deploy Mock Contracts
-  console.info('Deploy WMATIC Mock');
   await deployERC20Mock('WMATIC', 10000, deploy, deployer);
-
-  console.info('Deploy USDT Mock');
   await deployERC20Mock('USDT', 20000, deploy, deployer);
-
-  console.info('Deploy amUSDT Mock');
   const amUSDT = await deployERC20Mock('amUSDT', 0, deploy, deployer);
 
   console.info('Deploy Lending Pool Mock');

@@ -18,7 +18,7 @@ module.exports = async ({ deployments, network }) => {
 
   const liquidityPools = {
     peusdt: {
-      name: 'PER/USDT',
+      name: 'PE/USDT',
       token0: {
         // PER
         address: peronioArtifact.address,
@@ -33,7 +33,7 @@ module.exports = async ({ deployments, network }) => {
       },
     },
     pewmatic: {
-      name: 'PER/WMATIC',
+      name: 'PE/WMATIC',
       token0: {
         // PER
         address: peronioArtifact.address,
