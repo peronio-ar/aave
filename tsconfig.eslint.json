@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.json",
+  "files": ["hardhat.config.ts", ".eslintrc.js"],
+  "compilerOptions": {
+    "allowJs": true
+  }
+}
