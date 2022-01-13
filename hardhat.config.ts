@@ -1,8 +1,5 @@
 import 'dotenv/config';
 
-// import utils from 'ethers';
-import fs from 'fs';
-
 import 'hardhat-deploy';
 import '@tenderly/hardhat-tenderly';
 import '@eth-optimism/hardhat-ovm';
@@ -23,19 +20,6 @@ const defaultNetwork = 'localhost';
 const gasPrice = parseFloat(process.env.GAS_PRICE || '1');
 const PRIVATE_KEY = process.env.PRIVATE_KEY ?? '';
 const ETHERSCAN_API = process.env.ETHERSCAN_API ?? '';
-
-function mnemonic() {
-  try {
-    return fs.readFileSync('./mnemonic.txt').toString().trim();
-  } catch (e) {
-    if (defaultNetwork !== 'localhost') {
-      console.log(
-        '☢️ WARNING: No mnemonic file created for a deploy account. Try `yarn run generate` and then `yarn run account`.'
-      );
-    }
-  }
-  return '';
-}
 
 module.exports = {
   defaultNetwork,
