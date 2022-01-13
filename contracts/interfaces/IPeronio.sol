@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.2;
-interface IERC20Collateral {
+
+interface IPeronio {
   function DEFAULT_ADMIN_ROLE (  ) external view returns ( bytes32 );
   function DOMAIN_SEPARATOR (  ) external view returns ( bytes32 );
   function MARKUP_ROLE (  ) external view returns ( bytes32 );

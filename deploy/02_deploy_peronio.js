@@ -17,7 +17,7 @@ module.exports = async ({ getNamedAccounts, deployments, network }) => {
   );
 
   await deploy('Peronio', {
-    contract: 'ERC20Collateral',
+    contract: 'Peronio',
     from: deployer,
     log: true,
     args: [

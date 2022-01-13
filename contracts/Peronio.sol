@@ -12,39 +12,36 @@ import "./uniswap/interfaces/IUniswapV2Router01.sol";
 import "./aave/interfaces/IAaveIncentivesController.sol";
 import "./aave/interfaces/ILendingPool.sol";
 
-contract ERC20Collateral is ERC20, ERC20Burnable, ERC20Permit, AccessControl {
+import "./interfaces/IERC20Collateralized.sol";
+
+contract Peronio is ERC20, ERC20Burnable, ERC20Permit, AccessControl, IERC20Collateralized {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
     // Aave
-    address public immutable aave_incentive_address; // Incentive Contract Address
-    address public immutable aave_lending_pool_address; // Lending pool Contract
+    address public override immutable aave_incentive_address; // Incentive Contract Address
+    address public override immutable aave_lending_pool_address; // Lending pool Contract
 
     // Local Router
-    address public immutable uniswap_router_address;
+    address public override immutable uniswap_router_address;
 
     // WMatic ERC20 address
-    address public immutable wmatic_address;
+    address public override immutable wmatic_address;
 
     // Underlying asset address (USDT)
-    address public immutable collateral_address;
-    address public immutable collateral_aave_address;
+    address public override immutable collateral_address;
+    address public override immutable collateral_aave_address;
 
     // Markup
-    uint8 public constant markup_decimals = 4;
-    uint256 public markup = 5 * 10 ** markup_decimals; // 5%
+    uint8 public override constant markup_decimals = 4;
+    uint256 public override markup = 5 * 10 ** markup_decimals; // 5%
     
     // Initialization can only be run once
-    bool public initialized = false;
+    bool public override initialized = false;
     
-    // Events
-    event Initialized(address owner, uint collateral, uint starting_ratio);
-    event Minted(address to, uint collateralAmount, uint tokenAmount);
-    event Withdrawal(address to, uint collateralAmount, uint tokenAmount);
-
     // Roles
-    bytes32 public MARKUP_ROLE = keccak256("MARKUP_ROLE");
-    bytes32 public REWARDS_ROLE = keccak256("REWARDS_ROLE");
+    bytes32 public override MARKUP_ROLE = keccak256("MARKUP_ROLE");
+    bytes32 public override REWARDS_ROLE = keccak256("REWARDS_ROLE");
 
     // Collateral without decimals
     constructor(string memory name_, string memory symbol_, address collateral_address_, address collateral_aave_address_, address aave_lending_pool_address_, address wmatic_address_, address uniswap_router_address_, address aave_incentive_address_) ERC20(name_, symbol_) ERC20Permit(name_) {
@@ -76,31 +73,33 @@ contract ERC20Collateral is ERC20, ERC20Burnable, ERC20Permit, AccessControl {
     }
     
     // Sets initial minting. Cna only be runned once
-    function initialize(uint256 collateral, uint256 starting_ratio) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function initialize(uint256 collateral, uint256 starting_ratio) override public onlyRole(DEFAULT_ADMIN_ROLE) {
         require(!initialized, 'Contract already initialized');
-        IERC20 collateralContract = IERC20(collateral_address);
         
         require(ERC20(collateral_address).decimals() == decimals(), 'Decimals from collateral and this ERC20 must match');
         
         // Get USDT from user
-        collateralContract.safeTransferFrom(_msgSender(), address(this), collateral);
+        IERC20(collateral_address).safeTransferFrom(_msgSender(), address(this), collateral);
         
         // Zaps into amUSDT
         zapCollateral(collateral);
 
         _mint(_msgSender(), starting_ratio.mul(collateral));
+
+        // Lock contract to prevent to be initialized twice
         initialized = true;
         emit Initialized(_msgSender(), collateral, starting_ratio);
     }
 
     // Sets markup for minting function
-    function setMarkup(uint256 markup_) public onlyRole(MARKUP_ROLE) {
+    function setMarkup(uint256 markup_) override public onlyRole(MARKUP_ROLE) {
         require(markup_ >= 0, 'Contract already initialized');
         markup = markup_;
+        emit MarkupUpdated(_msgSender(), markup_);
     }
     
     // Receive Collateral token and mints the proportional tokens
-    function mint(address to, uint256 amount) public { //Amount for this ERC20
+    function mint(address to, uint256 amount) override public { //Amount for this ERC20
         // Calculate buying price (Collateral ratio + Markup)
         uint collateral_amount = buyingPrice().mul(amount).div(10 ** decimals());
 
@@ -115,7 +114,7 @@ contract ERC20Collateral is ERC20, ERC20Burnable, ERC20Permit, AccessControl {
     }
     
     // Receives Main token burns it and returns Collateral Token proportionally
-    function withdraw(address to, uint amount) public { //Amount for this ERC20
+    function withdraw(address to, uint amount) override public { //Amount for this ERC20
         // Transfer collateral back to user wallet to current contract
         uint collateralAmount = collateralRatio().mul(amount).div(10 ** decimals());
 
@@ -146,29 +145,29 @@ contract ERC20Collateral is ERC20, ERC20Burnable, ERC20Permit, AccessControl {
     }
     
     // Gets current Collateral Balance (USDT) in vault
-    function collateralBalance() public view returns (uint256){
+    function collateralBalance() public view override returns (uint256){
         return ERC20(collateral_aave_address).balanceOf(address(this));
     }
     
     // Gets current ratio: Collateral Balance in vault / Total Supply
-    function collateralRatio() public view returns (uint256){
+    function collateralRatio() public view override returns (uint256){
         return collateralBalance().mul(10 ** decimals()).div(this.totalSupply());
     }
 
     // Gets current ratio: Total Supply / Collateral Balance in vault
-    function collateralPrice() public view returns (uint256) {
+    function collateralPrice() public view override returns (uint256) {
         return (this.totalSupply().mul(10 ** decimals())).div(collateralBalance()); 
     }
 
     // Gets current ratio: collateralRatio + markup
-    function buyingPrice() public view returns (uint256) {
+    function buyingPrice() public view override returns (uint256) {
         uint base_price = collateralRatio();
         uint fee = (base_price.mul(markup)).div(10 ** (markup_decimals + 2));
         return base_price + fee;
     }
 
     // Claim AAVE Rewards (WMATIC) into this contract
-    function claimAaveRewards() public onlyRole(REWARDS_ROLE) {
+    function claimAaveRewards() override public onlyRole(REWARDS_ROLE) {
         IAaveIncentivesController aaveContract = IAaveIncentivesController(aave_incentive_address);
         // we're only checking for one asset (Token which is an interest bearing amToken)
         address[] memory rewardsPath = new address[](1);
@@ -181,10 +180,12 @@ contract ERC20Collateral is ERC20, ERC20Burnable, ERC20Permit, AccessControl {
         if(rewardBalance > 2){
             aaveContract.claimRewards(rewardsPath, rewardBalance, address(this));
         }
+
+        emit ClaimedRewards(rewardBalance);
     }
 
     // Swap MATIC into USDT
-    function harvestMaticIntoToken() public onlyRole(REWARDS_ROLE) {
+    function harvestMaticIntoToken() override public onlyRole(REWARDS_ROLE) {
         // claims any available Matic from the Aave Incentives contract.
         IERC20 wMaticContract = IERC20(wmatic_address);
         uint256 _wmaticBalance = wMaticContract.balanceOf(address(this));
@@ -207,6 +208,8 @@ contract ERC20Collateral is ERC20, ERC20Burnable, ERC20Permit, AccessControl {
             IERC20(collateral_address).safeApprove(aave_lending_pool_address, newBalance);
             // then we need to deposit it into the lending pool
             zapCollateral(newBalance);
+
+            emit HarvestedMatic(_wmaticBalance, newBalance);
         }
     }
 }

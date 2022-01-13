@@ -16,7 +16,7 @@ task('polygonscan', 'Verify contract on Polyscan').setAction(
 
     const usdtAddress = (await deployments.get('USDT')).address;
     const peronioAddress = (await deployments.get('Peronio')).address;
-    const factoryAddress = (await deployments.get('Factory')).address;
+    const factoryAddress = (await deployments.get('UniswapV2Factory')).address;
     const routerAddress = (await deployments.get('UniswapV2Router02')).address;
     const pairAddress = (await deployments.get('PairPEUSDT')).address;
     const { deployer } = await getNamedAccounts();
@@ -31,6 +31,9 @@ task('polygonscan', 'Verify contract on Polyscan').setAction(
           process.env.USDT_ADDRESS,
           process.env.AMUSDT_ADDRESS,
           process.env.AAVE_LENDING_POOL_ADDRESS,
+          process.env.WMATIC_ADDRESS,
+          routerAddress,
+          process.env.AAVE_INCENTIVE_ADDRESS,
         ],
       });
     } catch (e: any) {

@@ -121,10 +121,8 @@ describe('Contracts Setup', function () {
 
   describe('Deploy Peronio', function () {
     it('Should deploy UniswapV2Factory', async function () {
-      const ERC20CollateralContract = await ethers.getContractFactory(
-        'ERC20Collateral'
-      );
-      peronioContract = await ERC20CollateralContract.deploy(
+      const PeronioContract = await ethers.getContractFactory('Peronio');
+      peronioContract = await PeronioContract.deploy(
         'Peronio Test',
         'PERT',
         usdtContract.address,

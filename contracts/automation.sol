@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.2;
 
-import "./ERC20Collateral.sol";
+import "./Peronio.sol";
 
 contract AutoCompounder {
-    ERC20Collateral peronio;
+    Peronio peronio;
 
     constructor (address _peronio) {
-        peronio = ERC20Collateral(_peronio);
+        peronio = Peronio(_peronio);
     }
 
     uint256 public lastExecuted;

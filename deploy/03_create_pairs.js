@@ -17,8 +17,8 @@ module.exports = async ({ deployments, network }) => {
   };
   const contracts = {
     usdt: await ethers.getContractAt('IERC20', addresses.usdt),
-    wmatic: await ethers.getContractAt('ERC20Collateral', addresses.wmatic),
-    peronio: await ethers.getContractAt('ERC20Collateral', addresses.peronio),
+    wmatic: await ethers.getContractAt('Peronio', addresses.wmatic),
+    peronio: await ethers.getContractAt('Peronio', addresses.peronio),
     factory: await ethers.getContractAt('UniswapV2Factory', addresses.factory),
     router: await ethers.getContractAt('UniswapV2Router02', addresses.factory),
   };

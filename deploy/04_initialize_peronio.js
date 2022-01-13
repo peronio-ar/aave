@@ -16,7 +16,7 @@ module.exports = async ({ getNamedAccounts, deployments, network }) => {
 
   // Contracts
   const usdt = await ethers.getContractAt('IERC20', usdtAddress);
-  const peronio = await ethers.getContractAt('ERC20Collateral', peronioAddress);
+  const peronio = await ethers.getContractAt('Peronio', peronioAddress);
 
   // Check if contract is already initialized
   console.info('Checking if contract is already initialized...');
@@ -24,6 +24,8 @@ module.exports = async ({ getNamedAccounts, deployments, network }) => {
   if (initialized) {
     console.info('Already Initialized');
     return;
+  } else {
+    console.info('Not initialized');
   }
 
   console.info('Checking if there is enough USDT...');
@@ -39,10 +41,12 @@ module.exports = async ({ getNamedAccounts, deployments, network }) => {
   await usdt.approve(peronioAddress, defaultValues.collateralAmount);
   try {
     console.info('Initializing Contract...');
-    await peronio.initialize(
+    const tx = await peronio.initialize(
       defaultValues.collateralAmount,
       defaultValues.collateralRatio
     );
+    console.info('Waiting for confirmation...');
+    await tx.wait(1);
     console.info('Initialized Peronio ERC20');
   } catch (e) {
     if (e.message.indexOf('Contract already initialized') === -1) {
