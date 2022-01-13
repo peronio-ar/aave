@@ -194,14 +194,7 @@ describe('Contracts Setup', function () {
     });
   });
 
-  // END SETUP
-
-  describe('Test returns', function () {
-    const collateralLiquidity = initialCollateralLiquidity.toString();
-    const perLiquidity = (
-      initialCollateralLiquidity * collateralRatio
-    ).toString();
-
+  describe('Contract integrity check', function () {
     const ratioMarkedUp = parseFloat(((1 / collateralRatio) * 1.05).toFixed(6));
 
     it('Should be initialized', async function () {
@@ -248,5 +241,72 @@ describe('Contracts Setup', function () {
       );
       expect(parseFloat(val)).to.equal(ratioMarkedUp);
     });
+  });
+
+  describe('Minting and withdrawal', function () {
+    const mintAmount = 250;
+    const collateralAmount = 1;
+
+    describe('Mint 100 PE', function () {
+      it('Show USDT Balance', async function () {
+        const [owner] = await ethers.getSigners();
+        const deployer = owner.address;
+
+        console.info(
+          'Balance',
+          ethers.utils.formatUnits(await usdtContract.balanceOf(deployer), 6)
+        );
+      });
+
+      it('Should mint 100 PE', async function () {
+        const [owner] = await ethers.getSigners();
+        const deployer = owner.address;
+
+        console.info('deployer address: ', deployer);
+        console.info('peronio address: ', peronioContract.address);
+        // Allow
+        await usdtContract.approve(
+          peronioContract.address,
+          ethers.utils.parseUnits('1.1', 6)
+        );
+
+        console.info(
+          'Allowance: ',
+          ethers.utils.formatUnits(
+            await usdtContract.allowance(deployer, peronioContract.address),
+            6
+          )
+        );
+
+        // Mint token
+        await peronioContract.mint(
+          deployer,
+          ethers.utils.parseUnits(mintAmount.toString(), 6)
+        );
+
+        // expect(await peronioContract.buyingPrice()).to.equal(true);
+        return true;
+      });
+    });
+
+    // it('Check remaining PE Balance', async function () {
+    //   // expect(await peronioContract.buyingPrice()).to.equal(true);
+    // });
+
+    // it('Check remaining USDT Balance', async function () {
+    //   // expect(await peronioContract.buyingPrice()).to.equal(true);
+    // });
+
+    // it('Withdraw 100 PE', async function () {
+    //   // expect(await peronioContract.buyingPrice()).to.equal(true);
+    // });
+
+    // it('Check remaining PE Balance', async function () {
+    //   // expect(await peronioContract.buyingPrice()).to.equal(true);
+    // });
+
+    // it('Check remaining USDT Balance', async function () {
+    //   // expect(await peronioContract.buyingPrice()).to.equal(true);
+    // });
   });
 });
