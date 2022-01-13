@@ -55,13 +55,6 @@ module.exports = {
       gasPrice: gasPrice * 10 ** 9,
       accounts: [`${PRIVATE_KEY}`],
     },
-    bsc: {
-      url: 'https://bsc-dataseed.binance.org/',
-      gasPrice: 1000000000,
-      accounts: {
-        mnemonic: mnemonic(),
-      },
-    },
   },
   etherscan: {
     apiKey: ETHERSCAN_API,
