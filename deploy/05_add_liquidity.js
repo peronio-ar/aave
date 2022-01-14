@@ -119,7 +119,7 @@ async function addLiquidity(
   console.info('Approving ' + symbol0 + '...');
   await token0.approve(routerArtifact.address, amount0);
   console.info('Approving ' + symbol1 + '...');
-  await token1.approve(routerArtifact.address, amount1);
+  (await token1.approve(routerArtifact.address, amount1)).wait(1);
 
   console.info('Adding', symbol0, ethers.utils.formatUnits(amount0, 6));
   console.info('Adding', symbol1, ethers.utils.formatUnits(amount1, 6));
