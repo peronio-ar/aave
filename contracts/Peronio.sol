@@ -19,22 +19,22 @@ contract Peronio is ERC20, ERC20Burnable, ERC20Permit, AccessControl, IERC20Coll
     using SafeERC20 for IERC20;
 
     // Aave
-    address public override immutable aave_incentive_address; // Incentive Contract Address
-    address public override immutable aave_lending_pool_address; // Lending pool Contract
+    address public override immutable AAVE_INCENTIVES_ADDRESS; // Incentive Contract Address
+    address public override immutable AAVE_LENDING_POOL_ADDRESS; // Lending pool Contract
 
     // Local Router
-    address public override immutable uniswap_router_address;
+    address public override immutable UNISWAP_ROUTER_ADDRESS;
 
     // WMatic ERC20 address
-    address public override immutable wmatic_address;
+    address public override immutable WMATIC_ADDRESS;
 
     // Underlying asset address (USDT)
-    address public override immutable collateral_address;
-    address public override immutable collateral_aave_address;
+    address public override immutable COLLATERAL_ADDRESS;
+    address public override immutable COLLATERAL_AAVE_ADDRESS;
 
     // Markup
-    uint8 public override constant markup_decimals = 4;
-    uint256 public override markup = 5 * 10 ** markup_decimals; // 5%
+    uint8 public override constant MARKUP_DECIMALS = 4;
+    uint256 public override markup = 5 * 10 ** MARKUP_DECIMALS; // 5%
     
     // Initialization can only be run once
     bool public override initialized = false;
@@ -44,22 +44,22 @@ contract Peronio is ERC20, ERC20Burnable, ERC20Permit, AccessControl, IERC20Coll
     bytes32 public override constant REWARDS_ROLE = keccak256("REWARDS_ROLE");
 
     // Collateral without decimals
-    constructor(string memory name_, string memory symbol_, address collateral_address_, address collateral_aave_address_, address aave_lending_pool_address_, address wmatic_address_, address uniswap_router_address_, address aave_incentive_address_) ERC20(name_, symbol_) ERC20Permit(name_) {
+    constructor(string memory name_, string memory symbol_, address collateral_address_, address collateral_aave_address_, address aave_lending_pool_address_, address wmatic_address_, address uniswap_router_address_, address aave_incentives_address_) ERC20(name_, symbol_) ERC20Permit(name_) {
         // WMatic ERC20 address
-        wmatic_address = wmatic_address_;
+        WMATIC_ADDRESS = wmatic_address_;
 
         // Collateral and AAVE Token address
-        collateral_address = collateral_address_; //USDT
-        collateral_aave_address=collateral_aave_address_; //amUSDT
+        COLLATERAL_ADDRESS = collateral_address_; //USDT
+        COLLATERAL_AAVE_ADDRESS=collateral_aave_address_; //amUSDT
 
         // Uniswap Router address (Local)
-        uniswap_router_address = uniswap_router_address_;
+        UNISWAP_ROUTER_ADDRESS = uniswap_router_address_;
 
         // AAVE Lending Pool Address
-        aave_lending_pool_address = aave_lending_pool_address_;
+        AAVE_LENDING_POOL_ADDRESS = aave_lending_pool_address_;
 
         // AAVE Incentives Controller
-        aave_incentive_address = aave_incentive_address_;
+        AAVE_INCENTIVES_ADDRESS = aave_incentives_address_;
 
         // Grant roles
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
@@ -73,13 +73,12 @@ contract Peronio is ERC20, ERC20Burnable, ERC20Permit, AccessControl, IERC20Coll
     }
     
     // Sets initial minting. Cna only be runned once
-    function initialize(uint256 collateral, uint256 starting_ratio) override public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function initialize(uint256 collateral, uint256 starting_ratio) override external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(!initialized, 'Contract already initialized');
-        
-        require(ERC20(collateral_address).decimals() == decimals(), 'Decimals from collateral and this ERC20 must match');
+        require(ERC20(COLLATERAL_ADDRESS).decimals() == decimals(), 'Decimals from collateral and this ERC20 must match');
         
         // Get USDT from user
-        IERC20(collateral_address).safeTransferFrom(_msgSender(), address(this), collateral);
+        IERC20(COLLATERAL_ADDRESS).safeTransferFrom(_msgSender(), address(this), collateral);
         
         // Zaps into amUSDT
         zapCollateral(collateral);
@@ -98,12 +97,12 @@ contract Peronio is ERC20, ERC20Burnable, ERC20Permit, AccessControl, IERC20Coll
     }
     
     // Receive Collateral token and mints the proportional tokens
-    function mint(address to, uint256 amount) override public { //Amount for this ERC20
+    function mint(address to, uint256 amount) override external { //Amount for this ERC20
         // Calculate buying price (Collateral ratio + Markup)
         uint collateral_amount = buyingPrice().mul(amount).div(10 ** decimals());
 
         // Transfer Collateral Token (USDT) to this contract
-        IERC20(collateral_address).safeTransferFrom(_msgSender(), address(this), collateral_amount);
+        IERC20(COLLATERAL_ADDRESS).safeTransferFrom(_msgSender(), address(this), collateral_amount);
 
         // Zaps collateral into Collateral AAVE Token amUSDT
         zapCollateral(amount);
@@ -113,7 +112,7 @@ contract Peronio is ERC20, ERC20Burnable, ERC20Permit, AccessControl, IERC20Coll
     }
     
     // Receives Main token burns it and returns Collateral Token proportionally
-    function withdraw(address to, uint amount) override public { //Amount for this ERC20
+    function withdraw(address to, uint amount) override external { //Amount for this ERC20
         // Transfer collateral back to user wallet to current contract
         uint collateralAmount = collateralRatio().mul(amount).div(10 ** decimals());
 
@@ -121,7 +120,7 @@ contract Peronio is ERC20, ERC20Burnable, ERC20Permit, AccessControl, IERC20Coll
         unzapCollateral(amount);
 
         // Transfer back Collateral Token (USDT) the user
-        IERC20(collateral_address).safeTransfer(to, collateralAmount);
+        IERC20(COLLATERAL_ADDRESS).safeTransfer(to, collateralAmount);
 
         //Burn tokens
         _burn(_msgSender(), amount);
@@ -132,20 +131,20 @@ contract Peronio is ERC20, ERC20Burnable, ERC20Permit, AccessControl, IERC20Coll
     // Zaps collateral into Collateral AAVE Token amUSDT
     function zapCollateral(uint amount) private {
         // Deposit USDT to amUSDT
-        IERC20(collateral_address).approve(aave_lending_pool_address, amount);
-        ILendingPool(aave_lending_pool_address).deposit(collateral_address, amount, address(this), 0);
+        IERC20(COLLATERAL_ADDRESS).approve(AAVE_LENDING_POOL_ADDRESS, amount);
+        ILendingPool(AAVE_LENDING_POOL_ADDRESS).deposit(COLLATERAL_ADDRESS, amount, address(this), 0);
     }
 
     // Claim USDT in exchange of AAVE Token amUSDT
     function unzapCollateral(uint amount) private {
         // Withdraw USDT in exchange of me giving amUSDT
-        IERC20(collateral_aave_address).approve(aave_lending_pool_address, amount);
-        ILendingPool(aave_lending_pool_address).withdraw(collateral_address, amount, address(this));
+        IERC20(COLLATERAL_AAVE_ADDRESS).approve(AAVE_LENDING_POOL_ADDRESS, amount);
+        ILendingPool(AAVE_LENDING_POOL_ADDRESS).withdraw(COLLATERAL_ADDRESS, amount, address(this));
     }
     
     // Gets current Collateral Balance (USDT) in vault
     function collateralBalance() public view override returns (uint256){
-        return ERC20(collateral_aave_address).balanceOf(address(this));
+        return ERC20(COLLATERAL_AAVE_ADDRESS).balanceOf(address(this));
     }
     
     // Gets current ratio: Collateral Balance in vault / Total Supply
@@ -154,23 +153,23 @@ contract Peronio is ERC20, ERC20Burnable, ERC20Permit, AccessControl, IERC20Coll
     }
 
     // Gets current ratio: Total Supply / Collateral Balance in vault
-    function collateralPrice() public view override returns (uint256) {
+    function collateralPrice() external view override returns (uint256) {
         return (this.totalSupply().mul(10 ** decimals())).div(collateralBalance()); 
     }
 
     // Gets current ratio: collateralRatio + markup
     function buyingPrice() public view override returns (uint256) {
         uint base_price = collateralRatio();
-        uint fee = (base_price.mul(markup)).div(10 ** (markup_decimals + 2));
+        uint fee = (base_price.mul(markup)).div(10 ** (MARKUP_DECIMALS + 2));
         return base_price + fee;
     }
 
     // Claim AAVE Rewards (WMATIC) into this contract
-    function claimAaveRewards() override public onlyRole(REWARDS_ROLE) {
-        IAaveIncentivesController aaveContract = IAaveIncentivesController(aave_incentive_address);
+    function claimAaveRewards() override external onlyRole(REWARDS_ROLE) {
+        IAaveIncentivesController aaveContract = IAaveIncentivesController(AAVE_INCENTIVES_ADDRESS);
         // we're only checking for one asset (Token which is an interest bearing amToken)
         address[] memory rewardsPath = new address[](1);
-                rewardsPath[0] = collateral_aave_address;
+                rewardsPath[0] = COLLATERAL_AAVE_ADDRESS;
 
         // check how many matic are available to claim
         uint256 rewardBalance = aaveContract.getRewardsBalance(rewardsPath, address(this));
@@ -184,27 +183,27 @@ contract Peronio is ERC20, ERC20Burnable, ERC20Permit, AccessControl, IERC20Coll
     }
 
     // Swap MATIC into USDT
-    function harvestMaticIntoToken() override public onlyRole(REWARDS_ROLE) {
+    function harvestMaticIntoToken() override external onlyRole(REWARDS_ROLE) {
         // claims any available Matic from the Aave Incentives contract.
-        IERC20 wMaticContract = IERC20(wmatic_address);
+        IERC20 wMaticContract = IERC20(WMATIC_ADDRESS);
         uint256 _wmaticBalance = wMaticContract.balanceOf(address(this));
 
         if(_wmaticBalance > 2) {
             address[] memory path = new address[](2);
-                path[0] = wmatic_address;
-                path[1] = collateral_address;
+                path[0] = WMATIC_ADDRESS;
+                path[1] = COLLATERAL_ADDRESS;
     
-            wMaticContract.safeApprove(uniswap_router_address, _wmaticBalance);
+            wMaticContract.safeApprove(UNISWAP_ROUTER_ADDRESS, _wmaticBalance);
             
             // if successful this should increase the total MiMatic held by contract
-            IUniswapV2Router01(uniswap_router_address).swapExactTokensForTokens(_wmaticBalance, uint256(0), path, address(this), block.timestamp.add(1800));
+            IUniswapV2Router01(UNISWAP_ROUTER_ADDRESS).swapExactTokensForTokens(_wmaticBalance, uint256(0), path, address(this), block.timestamp.add(1800));
             
-            uint256 newBalance = IERC20(collateral_address).balanceOf(address(this));
+            uint256 newBalance = IERC20(COLLATERAL_ADDRESS).balanceOf(address(this));
 
             // Just being safe
-            IERC20(collateral_address).safeApprove(aave_lending_pool_address, 0);
+            IERC20(COLLATERAL_ADDRESS).safeApprove(AAVE_LENDING_POOL_ADDRESS, 0);
             // Approve Transfer _amount usdt to lending pool
-            IERC20(collateral_address).safeApprove(aave_lending_pool_address, newBalance);
+            IERC20(COLLATERAL_ADDRESS).safeApprove(AAVE_LENDING_POOL_ADDRESS, newBalance);
             // then we need to deposit it into the lending pool
             zapCollateral(newBalance);
 

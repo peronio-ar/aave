@@ -6,8 +6,12 @@ interface IPeronio {
   function DOMAIN_SEPARATOR (  ) external view returns ( bytes32 );
   function MARKUP_ROLE (  ) external view returns ( bytes32 );
   function REWARDS_ROLE (  ) external view returns ( bytes32 );
-  function aave_incentive_address (  ) external view returns ( address );
-  function aave_lending_pool_address (  ) external view returns ( address );
+  function AAVE_INCENTIVES_ADDRESS (  ) external view returns ( address );
+  function COLLATERAL_AAVE_ADDRESS (  ) external view returns ( address );
+  function COLLATERAL_ADDRESS (  ) external view returns ( address );
+  function AAVE_LENDING_POOL_ADDRESS (  ) external view returns ( address );
+  function UNISWAP_ROUTER_ADDRESS (  ) external view returns ( address );
+  function WMATIC_ADDRESS (  ) external view returns ( address );
   function allowance ( address owner, address spender ) external view returns ( uint256 );
   function approve ( address spender, uint256 amount ) external returns ( bool );
   function balanceOf ( address account ) external view returns ( uint256 );
@@ -18,8 +22,6 @@ interface IPeronio {
   function collateralBalance (  ) external view returns ( uint256 );
   function collateralPrice (  ) external view returns ( uint256 );
   function collateralRatio (  ) external view returns ( uint256 );
-  function collateral_aave_address (  ) external view returns ( address );
-  function collateral_address (  ) external view returns ( address );
   function decimals (  ) external view returns ( uint8 );
   function decreaseAllowance ( address spender, uint256 subtractedValue ) external returns ( bool );
   function getRoleAdmin ( bytes32 role ) external view returns ( bytes32 );
@@ -43,7 +45,5 @@ interface IPeronio {
   function totalSupply (  ) external view returns ( uint256 );
   function transfer ( address recipient, uint256 amount ) external returns ( bool );
   function transferFrom ( address sender, address recipient, uint256 amount ) external returns ( bool );
-  function uniswap_router_address (  ) external view returns ( address );
   function withdraw ( address to, uint256 amount ) external;
-  function wmatic_address (  ) external view returns ( address );
 }
