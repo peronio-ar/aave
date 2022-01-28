@@ -93,7 +93,6 @@ contract Peronio is ERC20, ERC20Burnable, ERC20Permit, AccessControl, IERC20Coll
 
     // Sets markup for minting function
     function setMarkup(uint256 markup_) override public onlyRole(MARKUP_ROLE) {
-        require(markup_ >= 0, 'Contract already initialized');
         markup = markup_;
         emit MarkupUpdated(_msgSender(), markup_);
     }
