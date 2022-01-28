@@ -40,8 +40,8 @@ contract Peronio is ERC20, ERC20Burnable, ERC20Permit, AccessControl, IERC20Coll
     bool public override initialized = false;
     
     // Roles
-    bytes32 public override MARKUP_ROLE = keccak256("MARKUP_ROLE");
-    bytes32 public override REWARDS_ROLE = keccak256("REWARDS_ROLE");
+    bytes32 public override constant MARKUP_ROLE = keccak256("MARKUP_ROLE");
+    bytes32 public override constant REWARDS_ROLE = keccak256("REWARDS_ROLE");
 
     // Collateral without decimals
     constructor(string memory name_, string memory symbol_, address collateral_address_, address collateral_aave_address_, address aave_lending_pool_address_, address wmatic_address_, address uniswap_router_address_, address aave_incentive_address_) ERC20(name_, symbol_) ERC20Permit(name_) {
