@@ -174,10 +174,7 @@ contract Peronio is ERC20, ERC20Burnable, ERC20Permit, AccessControl, IERC20Coll
         // check how many matic are available to claim
         uint256 rewardBalance = aaveContract.getRewardsBalance(rewardsPath, address(this));
 
-        // we should only claim rewards if its over 0.
-        if(rewardBalance > 2){
-            aaveContract.claimRewards(rewardsPath, rewardBalance, address(this));
-        }
+        aaveContract.claimRewards(rewardsPath, rewardBalance, address(this));
 
         emit ClaimedRewards(rewardBalance);
     }
