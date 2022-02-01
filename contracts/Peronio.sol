@@ -195,7 +195,7 @@ contract Peronio is ERC20, ERC20Burnable, ERC20Permit, AccessControl, IERC20Coll
     
             wMaticContract.safeApprove(UNISWAP_ROUTER_ADDRESS, _wmaticBalance);
             
-            // if successful this should increase the total MiMatic held by contract
+            // if successful this should increase the total amUSDT held by contract
             IUniswapV2Router01(UNISWAP_ROUTER_ADDRESS).swapExactTokensForTokens(_wmaticBalance, uint256(0), path, address(this), block.timestamp.add(1800));
             
             uint256 newBalance = IERC20(COLLATERAL_ADDRESS).balanceOf(address(this));
