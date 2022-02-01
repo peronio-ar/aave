@@ -25,6 +25,16 @@ module.exports = {
   defaultNetwork,
   gasPrice,
   networks: {
+    hardhat: {
+      forking: {
+        url: "https://polygon-mainnet.g.alchemy.com/v2/Wi60JHV5bj80NSw9BCvE48Gz5Z-3oajq",
+        blockNumber: 23522537
+      },
+      mining: {
+        auto: true,
+        interval: 1000
+      }
+    },
     localhost: {
       url: 'http://localhost:8545',
       accounts: [`${PRIVATE_KEY}`],
