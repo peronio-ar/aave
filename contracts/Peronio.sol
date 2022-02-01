@@ -105,7 +105,7 @@ contract Peronio is ERC20, ERC20Burnable, ERC20Permit, AccessControl, IERC20Coll
         IERC20(COLLATERAL_ADDRESS).safeTransferFrom(_msgSender(), address(this), collateral_amount);
 
         // Zaps collateral into Collateral AAVE Token amUSDT
-        zapCollateral(amount);
+        zapCollateral(collateral_amount);
 
         _mint(to, amount);
         emit Minted(_msgSender(), collateral_amount, amount);
@@ -117,7 +117,7 @@ contract Peronio is ERC20, ERC20Burnable, ERC20Permit, AccessControl, IERC20Coll
         uint collateralAmount = collateralRatio().mul(amount).div(10 ** decimals());
 
         // Claim USDT in exchange of AAVE Token amUSDT
-        unzapCollateral(amount);
+        unzapCollateral(collateralAmount);
 
         // Transfer back Collateral Token (USDT) the user
         IERC20(COLLATERAL_ADDRESS).safeTransfer(to, collateralAmount);
