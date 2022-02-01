@@ -3,7 +3,6 @@ const { ethers } = require('hardhat');
 const { defaultValues } = require('../helper-hardhat-config');
 
 module.exports = async ({ deployments, network }) => {
-  console.info('Liquidity Pool');
   const { get } = deployments;
   const { deployer } = await getNamedAccounts();
 
@@ -20,7 +19,7 @@ module.exports = async ({ deployments, network }) => {
     peusdt: {
       name: 'PE/USDT',
       token0: {
-        // PER
+        // PE
         address: peronioArtifact.address,
         amount: defaultValues.collateralStartingLiquidity.mul(
           defaultValues.collateralRatio
