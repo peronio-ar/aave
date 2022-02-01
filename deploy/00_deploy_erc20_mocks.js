@@ -32,16 +32,14 @@ module.exports = async ({ getNamedAccounts, deployments, network }) => {
         erc20Artifact
       )
     );
-    if (network.name === 'matic') {
-      save(
-        'WMATIC',
-        Object.assign({ address: process.env.WMATIC_ADDRESS }, erc20Artifact)
-      );
-      return;
-    }
+    save(
+      'WMATIC',
+      Object.assign({ address: process.env.WMATIC_ADDRESS }, erc20Artifact)
+    );
+    return;
 
     // Only in mumbai network
-    await deployERC20Mock('WMATIC', 10000, deploy, deployer);
+    // await deployERC20Mock('WMATIC', 10000, deploy, deployer);
     return;
   }
 
