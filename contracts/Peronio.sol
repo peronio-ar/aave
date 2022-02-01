@@ -72,7 +72,7 @@ contract Peronio is ERC20, ERC20Burnable, ERC20Permit, AccessControl, IERC20Coll
         return 6;
     }
     
-    // Sets initial minting. Cna only be runned once
+    // Sets initial minting. Can only be runned once
     function initialize(uint256 collateral, uint256 starting_ratio) override external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(!initialized, 'Contract already initialized');
         require(ERC20(COLLATERAL_ADDRESS).decimals() == decimals(), 'Decimals from collateral and this ERC20 must match');
