@@ -216,8 +216,7 @@ task('add_liquidity', 'Add Liquidity WMATIC/USDT')
       const { deployer } = await getNamedAccounts();
 
       const routerArtifact = await deployments.get('UniswapV2Router02');
-      const routerAddress =
-        _routerAddress ?? routerAddress ?? routerArtifact.address;
+      const routerAddress = _routerAddress ?? routerArtifact.address;
 
       const routerContract = await ethers.getContractAt(
         routerArtifact.abi,
