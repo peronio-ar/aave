@@ -59,7 +59,7 @@ task('swap', 'Swap USDT for WMATIC in QuickSwap')
       const { deployer } = await getNamedAccounts();
 
       const routerAddress =
-        _routerAddress ?? '0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff';
+        _routerAddress ?? '0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff'; //Quickswap
 
       const routerArtifact = await deployments.get('UniswapV2Router02');
       const quickswapContract = await ethers.getContractAt(
@@ -72,11 +72,11 @@ task('swap', 'Swap USDT for WMATIC in QuickSwap')
         process.env.USDT_ADDRESS
       );
 
-      const usdtAmount = ethers.utils.parseUnits(usdt ?? '1000', 6);
+      const usdtAmount = ethers.utils.parseUnits(usdt ?? '3000', 6);
 
       const path = [process.env.USDT_ADDRESS, process.env.WMATIC_ADDRESS];
 
-      await usdtContract.approve(quickswapAddress, usdtAmount);
+      await usdtContract.approve(routerAddress, usdtAmount);
 
       console.dir(
         await quickswapContract.swapExactTokensForTokens(
@@ -209,8 +209,8 @@ task('check_liquidity', 'Check Liquidity WMATIC/USDT')
 
 task('add_liquidity', 'Add Liquidity WMATIC/USDT')
   .addOptionalParam('router', 'Router Address (Default: Peronio Router)')
-  .addOptionalParam('usdt', 'USDT to use')
-  .addOptionalParam('wmatic', 'WMATIC to use')
+  .addOptionalParam('usdt', 'USDT to use (Default: 1600)')
+  .addOptionalParam('wmatic', 'WMATIC to use (Default: 1000)')
   .setAction(
     async ({ usdt, wmatic, router: _routerAddress }, { getNamedAccounts }) => {
       const { deployer } = await getNamedAccounts();
