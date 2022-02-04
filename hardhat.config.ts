@@ -9,7 +9,7 @@ import '@nomiclabs/hardhat-etherscan';
 import 'hardhat-interface-generator';
 
 import './tasks/peronio';
-import './tasks/pair';
+import './tasks/dex';
 import './tasks/polygonscan';
 
 //
@@ -26,9 +26,10 @@ module.exports = {
   gasPrice,
   networks: {
     hardhat: {
+      chainId: 31337,
       forking: {
         url: "https://polygon-mainnet.g.alchemy.com/v2/Wi60JHV5bj80NSw9BCvE48Gz5Z-3oajq",
-        blockNumber: 23522537
+        blockNumber: 24464942
       },
       mining: {
         auto: true,
@@ -36,15 +37,18 @@ module.exports = {
       }
     },
     localhost: {
+      chainId: 31337,
       url: 'http://localhost:8545',
       accounts: [`${PRIVATE_KEY}`],
     },
     matic: {
+      chainId: 137,
       url: 'https://polygon-mainnet.infura.io/v3/2343217699c44b45851935789f1f89e6',
       gasPrice: gasPrice * 10 ** 9,
       accounts: [`${PRIVATE_KEY}`],
     },
     mumbai: {
+      chainId: 80001,
       url: 'https://rpc-mumbai.maticvigil.com/',
       gasPrice: gasPrice * 10 ** 9,
       accounts: [`${PRIVATE_KEY}`],
